@@ -56,7 +56,7 @@ def run_debug():
 
 @roles('celery')
 def restart_celery():
-    run("workon rapback && supervisord restart rapback")
+    run("workon rapback && supervisorctl restart rapback-celery")
 
 def setup_new_instance():
     with cd("~"):
