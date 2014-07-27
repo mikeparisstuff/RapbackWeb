@@ -37,7 +37,6 @@ def deploy():
             run("git clone git@github.com:mlp5ab/RapbackWeb.git %s" % code_dir)
     with cd(code_dir):
         run("git pull origin")
-        run("git checkout 1.7")
         run("workon rapback && python manage.py migrate")
 
 @roles('web', 'celery')
