@@ -1,0 +1,22 @@
+import os
+
+DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+            'NAME': os.environ['RDS_DB_NAME'],                      # Or path to database file if using sqlite3.
+            # The following settings are not used with sqlite3:
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+            'PORT': os.environ['RDS_PORT'],                      # Set to empty string for default.
+    }
+}
+AWS_STORAGE_BUCKET_NAME = 'RapbackProd'
+
+# Celery
+BROKER_URL = "sqs://sqs.us-east-1.amazonaws.com/487142144782/rapback-celery-broker//"
+
+# Default to AWS creds. Won't be able to access without permissions
+REDIS_HOST = 'ec2-54-210-10-162.compute-1.amazonaws.com'
+REDIS_PORT = 6379
+REDIS_DB = 0
