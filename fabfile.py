@@ -34,7 +34,7 @@ def prepare_deploy(message):
 def deploy():
     with settings(warn_only=True):
         if run("test -d %s" % code_dir).failed:
-            run("git clone git@github.com:mlp5ab/rapback-django.git %s" % code_dir)
+            run("git clone git@github.com:mlp5ab/RapbackWeb.git %s" % code_dir)
     with cd(code_dir):
         run("git pull origin")
         run("git checkout 1.7")
