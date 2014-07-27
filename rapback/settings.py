@@ -59,9 +59,16 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_swagger',
+    'django_extensions',
+    'gunicorn',
+    'djcelery',
     'api.users',
     'api.rapsessions',
-    'api.feedback'
+    'api.feedback',
+    'core'
 )
 
 MIDDLEWARE_CLASSES = (
