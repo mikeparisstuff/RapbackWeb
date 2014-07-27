@@ -6,13 +6,10 @@ from rest_framework.authtoken.models import Token
 from api.users.models import Profile, Follow
 from api.users.serializers import ProfileSerializer
 from core.api import AuthenticatedView, UnauthenticatedView
-from rapback.rapback_celery import add_session_to_feed
-
 
 class WelcomePage(APIView):
     def get(self, request, format=None):
         # increment_page_hit_count.delay()
-        add_session_to_feed(1, 1)
         return Response('Welcome to the Rapchat API.  Goto /api-docs/ for more details.')
 
 class HandleProfiles(APIView):
@@ -90,12 +87,10 @@ class HandleProfile(AuthenticatedView):
         '''
         try:
             profile = Profile.objects.get(username=username)
-            prof_serializer = PublicProfileSerializer(profile)
+            prof_serializer = ProfileSerializer(profile)
             likes = profile.get_likes()
-            likes_serializer = LikeSerializer(likes, many=True)
             return Response({
-                'profile': prof_serializer.data,
-                'likes': likes_serializer.data
+                'profile': prof_serializer.data
                 }, status=status.HTTP_200_OK
             )
         except Profile.DoesNotExist:
@@ -146,7 +141,7 @@ class HandleMyProfile(AuthenticatedView):
         Get my profile.
         '''
         me = Profile.objects.get(username = request.user.username)
-        serializer = MyProfileSerializer(me)
+        serializer = ProfileSerializer(me)
         return Response(
             serializer.data,
             status=status.HTTP_200_OK

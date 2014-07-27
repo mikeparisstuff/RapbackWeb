@@ -37,7 +37,7 @@ def deploy():
             run("git clone git@github.com:mlp5ab/RapbackWeb.git %s" % code_dir)
     with cd(code_dir):
         run("git pull origin")
-        run("workon rapback && python manage.py migrate")
+        # run("workon rapback && python manage.py migrate")
 
 @roles('web', 'celery')
 def full_deploy(message):
@@ -56,7 +56,7 @@ def run_debug():
 
 @roles('celery')
 def restart_celery():
-    run("workon rapback && supervisorctl restart rapback-celery")
+    run("workon rapback && supervisorctl -c ~/.supervisor/supervisord.conf restart rapback-celery")
 
 def setup_new_instance():
     with cd("~"):
