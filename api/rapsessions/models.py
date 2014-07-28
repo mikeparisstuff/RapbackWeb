@@ -1,10 +1,11 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
 from datetime import datetime
 
 from api.users.models import Profile
+
+
 
 
 
@@ -101,7 +102,7 @@ class RapSession(models.Model):
 
     def create_activity(self):
         from feedly.activity import Activity
-        from core.verbs import Session as SessionVerb
+        from api.core.verbs import Session as SessionVerb
         activity = Activity(
             actor = self.creator.id,
             verb = SessionVerb,

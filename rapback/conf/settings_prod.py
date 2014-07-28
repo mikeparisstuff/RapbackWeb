@@ -17,6 +17,11 @@ AWS_STORAGE_BUCKET_NAME = 'RapbackProd'
 BROKER_URL = "sqs://sqs.us-east-1.amazonaws.com/487142144782/rapback-celery-broker//"
 
 # Default to AWS creds. Won't be able to access without permissions
-REDIS_HOST = 'ec2-54-210-10-162.compute-1.amazonaws.com'
-REDIS_PORT = 6379
-REDIS_DB = 0
+FEEDLY_REDIS_CONFIG = {
+    'default': {
+        'host': 'ec2-54-210-10-162.compute-1.amazonaws.com',
+        'port': 6379,
+        'db': 0,
+        'password': None
+    },
+}

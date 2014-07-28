@@ -16,8 +16,13 @@ DATABASES = {
 BROKER_URL = "sqs://sqs.us-east-1.amazonaws.com/487142144782/vagrant-celery-broker"
 
 # Redis
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_DB = 0
+FEEDLY_REDIS_CONFIG = {
+    'default': {
+        'host': 'localhost',
+        'port': 6379,
+        'db': 0,
+        'password': None
+    },
+}
 
 AWS_STORAGE_BUCKET_NAME = 'rapback-vagrantbucket'

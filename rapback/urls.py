@@ -4,6 +4,7 @@ from django.contrib import admin
 from api.users import views as users_views
 from api.rapsessions import views as sessions_views
 
+
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'rapback.views.home', name='home'),
@@ -12,7 +13,7 @@ urlpatterns = patterns('',
     url(r'api-docs', include('rest_framework_swagger.urls')),
 
     # USER ENDPOINTS
-    # USER ENDPOINTS
+    url(r'^$', users_views.WelcomePage.as_view(), name='welcome_page'),
     url(r'^users/$', users_views.HandleProfiles.as_view(), name='create_new_user'),
     url(r'^users/(?P<username>\w{3,50})/$', users_views.HandleProfile.as_view(), name='handle_user'),
     url(r'^users/me/$', users_views.HandleMyProfile.as_view(), name='get_my_user'),

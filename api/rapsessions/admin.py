@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.db import models
 
 from api.rapsessions.models import RapSession, Clip, Like, Beat
 

@@ -1,8 +1,8 @@
-from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework import serializers, pagination
-from api.users.serializers import FlatProfileSerializer
 
+from api.users.serializers import FlatProfileSerializer
 from api.rapsessions.models import RapSession, Clip, Comment, Like, Beat
+
 
 class CommentSerializer(serializers.ModelSerializer):
 
@@ -86,8 +86,6 @@ class RapSessionSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'creator',
-            'is_complete',
-            'visibility',
             'comments',
             'clips',
             'beat',
@@ -133,7 +131,6 @@ class ClipSerializer(serializers.ModelSerializer):
             'end_time',
             'times_played',
             'clip_num',
-            'creator',
             'session',
             'created_at',
             'modified_at'

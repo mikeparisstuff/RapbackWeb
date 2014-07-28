@@ -68,7 +68,7 @@ INSTALLED_APPS = (
     'api.users',
     'api.rapsessions',
     'api.feedback',
-    'core'
+    'api.core'
 )
 
 MIDDLEWARE_CLASSES = (

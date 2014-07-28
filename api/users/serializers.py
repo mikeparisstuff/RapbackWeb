@@ -44,14 +44,27 @@ class ProfileSerializer(serializers.ModelSerializer):
         return None
 
     def get_followers(self, profile):
-        return FlatProfileSerializer(profile.get_followers(), many=True).data
+        followers = profile.get_followers()
+        if len(followers):
+            item = followers[0]
+            followers = [follow.user for follow in followers]
+            return FlatProfileSerializer(followers, many=True).data
+        else:
+            return None
+
 
     def get_following(self, profile):
-        return FlatProfileSerializer(profile.get_followers(), many=True).data
+        following = profile.get_following()
+        if len(following):
+            print following
+            following = [follow.target for follow in following]
+            return FlatProfileSerializer(following, many=True).data
+        else:
+            return None
 
     # user = UserSerializer()
-    following = serializers.SerializerMethodField('get_following')
     followers = serializers.SerializerMethodField('get_followers')
+    following = serializers.SerializerMethodField('get_following')
 
     num_likes = serializers.SerializerMethodField('get_num_likes')
     num_raps = serializers.SerializerMethodField('get_num_raps')
@@ -71,6 +84,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'last_login',
             'phone_number',
             'num_likes',
-            'num_friends',
-            'num_raps'
+            'num_raps',
+            'following',
+            'followers'
         )

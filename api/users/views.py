@@ -5,7 +5,8 @@ from rest_framework.authtoken.models import Token
 
 from api.users.models import Profile, Follow
 from api.users.serializers import ProfileSerializer
-from core.api import AuthenticatedView, UnauthenticatedView
+from api.core.api import AuthenticatedView, UnauthenticatedView
+
 
 class WelcomePage(APIView):
     def get(self, request, format=None):
@@ -140,10 +141,12 @@ class HandleMyProfile(AuthenticatedView):
         '''
         Get my profile.
         '''
-        me = Profile.objects.get(username = request.user.username)
+        # me = Profile.objects.get(username = request.user.username)
+        me = request.user
         serializer = ProfileSerializer(me)
-        return Response(
-            serializer.data,
+        return Response({
+            "profile": serializer.data
+            },
             status=status.HTTP_200_OK
         )
 
@@ -175,7 +178,8 @@ class HandleMyProfile(AuthenticatedView):
                 'profile': serializer.data
                 }, status=status.HTTP_200_OK
             )
-        except KeyError:
+        except KeyError as e:
+            print e
             return Response({
                 'error': 'Must include first_name, last_name, email, and phone_number'
                 }, status=status.HTTP_400_BAD_REQUEST

@@ -1,18 +1,11 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 from rest_framework import status
 from rest_framework.response import Response
 
 from api.rapsessions.models import RapSession, Clip, Comment, Like, Beat
-from rapback.serializers import RapSessionSerializer, ClipSerializer, CommentSerializer, LikeSerializer, PaginatedRapSessionSerializer, PaginatedCompletedRapSessionSerializer
-
-from core.rapsession_feedly import feedly
-
-from api.users.models import Profile
-from core.api import AuthenticatedView
-# from core.video_stitching import video_stitcher
-
-import json
+from api.rapsessions.serializers import RapSessionSerializer, ClipSerializer, CommentSerializer, LikeSerializer, PaginatedRapSessionSerializer
+from .rapsession_feedly import feedly
+from api.core.api import AuthenticatedView
 
 
 ####################################################################
@@ -29,14 +22,12 @@ class HandleRapSessions(AuthenticatedView):
         clip (required) -- The rap clip for the rap session
         duration (required) -- The duration of the song in milliseconds
         waveform (required) -- The image for the waveform of the first clip
-        visibility (required) -- A value of either 'public' or 'friends' the designate who can see this session
         beat_id (required) -- The id of the beat associated with this rap
         '''
         try:
             title = request.DATA['title']
             clip = request.FILES['clip']
             duration = request.DATA['duration']
-            visibility = request.DATA['visibility']
             creator = request.user
 
             beat = Beat.objects.get(id = request.DATA['beat_id'])
@@ -44,7 +35,6 @@ class HandleRapSessions(AuthenticatedView):
             gs = RapSession.objects.create(
                 title = title,
                 creator = creator,
-                visibility = visibility,
                 beat = beat
             )
             print "created session"
@@ -65,15 +55,15 @@ class HandleRapSessions(AuthenticatedView):
             clip.save()
             print "Created Clip. Initiating Session Fanout"
 
-
-
+            feedly.add_session(gs)
 
             serializer = RapSessionSerializer(gs)
             return Response(
                 {"session": serializer.data},
                 status=status.HTTP_201_CREATED
             )
-        except KeyError:
+        except KeyError as e:
+            print e
             return Response(
                 {'error': 'New sessions require a title, clip, duration, beat_id, waveform, and visibility'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -87,10 +77,14 @@ class HandleRapSessions(AuthenticatedView):
         TODO: Filter the user data that gets send at this endpoint.
         We probably don't want each users friend information to be being sent etc.
         '''
-        sessions = RapSession.objects.order_by('-modified_at')[:16]
+        # sessions = RapSession.objects.order_by('-modified_at')[:16]
 
-        feed = feedly.get_feeds(request.user.id)['normal']
-        print 'Got feed: {}'.format(feed)
+        feed = feedly.get_user_feed(request.user.id)
+
+        print 'GOT FEED WITH COUNT: {}'.format(feed.count())
+        session_ids = feed.get_ids()
+
+        sessions = RapSession.objects.filter(id__in = session_ids).order_by('-created_at')
 
         print "USER: {0}".format(request.user.username)
 
@@ -195,7 +189,7 @@ class HandleMyRapSessionClips(AuthenticatedView):
         '''
         Get all my clips.
         '''
-        clips = request.user.clip_set.all().order_by('-created')
+        clips = request.user.clip_set.all().order_by('-created_at')
         serializer = ClipSerializer(clips, many=True)
         return Response({'clips': serializer.data}, status=status.HTTP_200_OK)
 

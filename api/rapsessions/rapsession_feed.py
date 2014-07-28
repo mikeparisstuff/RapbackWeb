@@ -9,6 +9,12 @@ class SessionFeed(RedisFeed):
     '''
     key_format = 'feed:normal:%(user_id)s'
 
+    def get_ids(self):
+        ids = []
+        for elem in self[:]:
+            ids.append(elem.object_id)
+        return ids
+
 class UserSessionFeed(SessionFeed):
     '''
     A feed that holds of the user with id=user_id most recent posts

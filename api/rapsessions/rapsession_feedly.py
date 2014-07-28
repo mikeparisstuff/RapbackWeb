@@ -2,8 +2,8 @@ __author__ = 'MichaelParis'
 
 from feedly.feed_managers.base import Feedly, FanoutPriority
 
+from .rapsession_feed import SessionFeed, UserSessionFeed
 from api.users.models import Follow
-from core.rapsession_feed import SessionFeed, UserSessionFeed
 
 class SessionFeedly(Feedly):
 
@@ -15,7 +15,7 @@ class SessionFeedly(Feedly):
 
     def add_session(self, session):
         activity = session.create_activity()
-        self.add_user_activity(session.creator.id)
+        self.add_user_activity(session.creator.id, activity)
 
     def remove_session(self, session):
         activity = session.create_activity()

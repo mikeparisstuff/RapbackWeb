@@ -1,6 +1,5 @@
-import datetime
 
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
@@ -33,11 +32,11 @@ class Profile(AbstractUser):
     )
 
     def get_followers(self):
-        followers = Follow.objects.filter(target = self)
+        followers = Follow.objects.filter(target = self).select_related('user')
         return followers
 
     def get_following(self):
-        following = Follow.objects.filter(user = self)
+        following = Follow.objects.filter(user = self).select_related('target')
         return following
 
     def get_profile_picture_url(self, profile):
