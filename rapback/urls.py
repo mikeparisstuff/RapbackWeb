@@ -3,6 +3,7 @@ from django.contrib import admin
 
 from api.users import views as users_views
 from api.rapsessions import views as sessions_views
+from api.feedback import views as feedback_views
 
 
 urlpatterns = patterns('',
@@ -16,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^$', users_views.WelcomePage.as_view(), name='welcome_page'),
     url(r'^users/$', users_views.HandleProfiles.as_view(), name='create_new_user'),
     url(r'^users/(?P<username>\w{3,50})/$', users_views.HandleProfile.as_view(), name='handle_user'),
+    url(r'^users/(?P<user_id>\d+)/sessions/$', sessions_views.HandleProfileSessions.as_view(), name='handle_user'),
     url(r'^users/me/$', users_views.HandleMyProfile.as_view(), name='get_my_user'),
     url(r'^users/me/likes/$', sessions_views.HandleRapSessionLikes.as_view(), name='get_my_likes'),
     url(r'^users/me/clips/$', sessions_views.HandleMyRapSessionClips.as_view(), name='get_my_clips'),
@@ -24,6 +26,8 @@ urlpatterns = patterns('',
     url(r'^users/obtain-token/$', 'rest_framework.authtoken.views.obtain_auth_token'),
     url(r'^invite/$', users_views.HandleInvites.as_view(), name='invite_users'),
     url(r'^search/$', users_views.HandleSearch.as_view(), name='search_users'),
+
+    url(r'^feedback/$', feedback_views.HandleFeedback.as_view(), name='handle_feedback'),
 
     # SESSIONS ENDPOINTS
     url(r'^users/me/sessions/$', sessions_views.HandleRapSessions.as_view(), name='handle_sessions'),

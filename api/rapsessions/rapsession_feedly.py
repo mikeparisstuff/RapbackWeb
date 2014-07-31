@@ -13,6 +13,8 @@ class SessionFeedly(Feedly):
 
     user_feed_class = UserSessionFeed
 
+    fanout_chunk_size = 1
+
     def add_session(self, session):
         activity = session.create_activity()
         self.add_user_activity(session.creator.id, activity)

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 
 from api.rapsessions.models import RapSession, Clip, Comment, Like, Beat
 from api.rapsessions.serializers import RapSessionSerializer, ClipSerializer, CommentSerializer, LikeSerializer, PaginatedRapSessionSerializer
+from api.users.models import Profile
 from .rapsession_feedly import feedly
 from api.core.api import AuthenticatedView
 
@@ -79,7 +80,7 @@ class HandleRapSessions(AuthenticatedView):
         '''
         # sessions = RapSession.objects.order_by('-modified_at')[:16]
 
-        feed = feedly.get_user_feed(request.user.id)
+        feed = feedly.get_feeds(request.user.id)['normal']
 
         print 'GOT FEED WITH COUNT: {}'.format(feed.count())
         session_ids = feed.get_ids()
@@ -105,6 +106,33 @@ class HandleRapSessions(AuthenticatedView):
         serializer = PaginatedRapSessionSerializer(sessions, context=serializer_context)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class HandleProfileSessions(AuthenticatedView):
+    def get(self, request, format=None, user_id = None):
+        '''
+        Get the personal feed of the user with the given username
+        user_id (required) -- The username of the feed to get
+        '''
+        print "In Request " + user_id
+        try:
+            profile = Profile.objects.get(id = user_id)
+            feed = feedly.get_user_feed(profile.id)
+            session_ids = feed.get_ids()
+            sessions = RapSession.objects.filter(id__in = session_ids).order_by('-created_at')
+            serializer = RapSessionSerializer(sessions, many=True)
+            return Response({
+                'sessions': serializer.data
+                }, status = status.HTTP_200_OK
+            )
+        except KeyError:
+            return Response({
+                'error': 'Must supply a username'
+                }, status=status.HTTP_400_BAD_REQUEST
+            )
+        except Profile.DoesNotExist:
+            return Response({
+                'error': 'Could not find that user'
+                }, status=status.HTTP_400_BAD_REQUEST
+            )
 
 class HandleRapSession(AuthenticatedView):
 
@@ -274,6 +302,7 @@ class HandleRapSessionLikes(AuthenticatedView):
                 }, status=status.HTTP_200_OK
             )
         except Like.DoesNotExist:
+            session = RapSession.objects.get(id=request.DATA['session'])
             like = Like.objects.create(
                 user= request.user,
                 session= session

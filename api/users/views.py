@@ -198,7 +198,7 @@ class HandleFollowers(AuthenticatedView):
         try:
             target_uname = request.DATA['target']
             target = Profile.objects.get(username=target_uname)
-            Follow.objects.create(
+            Follow.objects.get_or_create(
                 user = me,
                 target = target
             )

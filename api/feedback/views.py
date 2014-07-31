@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from api.core.api import AuthenticatedView
-from api.core.api.feedback.models import FeedbackMessage
+from api.feedback.models import FeedbackMessage
 
 
 class HandleFeedback(AuthenticatedView):
@@ -15,7 +15,7 @@ class HandleFeedback(AuthenticatedView):
 		message (required) -- The message to create the feedback
 		'''
 		try:
-			creator = request.user.get_profile()
+			creator = request.user
 			message = request.DATA['message']
 			feedback = FeedbackMessage.objects.create(
 				creator = creator,
