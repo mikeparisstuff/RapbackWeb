@@ -11,7 +11,7 @@ DATABASES = {
             'PORT': os.environ['RDS_PORT'],                      # Set to empty string for default.
     }
 }
-AWS_STORAGE_BUCKET_NAME = 'RapbackProd'
+AWS_STORAGE_BUCKET_NAME = 'rapbackprod'
 
 # Celery
 BROKER_URL = "sqs://sqs.us-east-1.amazonaws.com/487142144782/rapback-celery-broker//"
