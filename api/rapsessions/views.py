@@ -81,7 +81,7 @@ class HandleRapSessions(AuthenticatedView):
         # sessions = RapSession.objects.order_by('-modified_at')[:16]
 
         feed = feedly.get_feeds(request.user.id)['normal']
-        user_feed = feedly.get_feeds(request.user.id)['user']
+        user_feed = feedly.get_user_feed(request.user.id)
 
 
         print 'GOT FEED WITH COUNT: {}'.format(feed.count())
