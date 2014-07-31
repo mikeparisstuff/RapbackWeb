@@ -81,9 +81,13 @@ class HandleRapSessions(AuthenticatedView):
         # sessions = RapSession.objects.order_by('-modified_at')[:16]
 
         feed = feedly.get_feeds(request.user.id)['normal']
+        user_feed = feedly.get_feeds(request.user.id)['user']
+
 
         print 'GOT FEED WITH COUNT: {}'.format(feed.count())
         session_ids = feed.get_ids()
+        user_session_ids = user_feed.get_ids()
+        session_ids.extend(user_session_ids)
 
         sessions = RapSession.objects.filter(id__in = session_ids).order_by('-created_at')
 
