@@ -1,4 +1,4 @@
-
+from datetime import datetime
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db import models
@@ -46,13 +46,13 @@ class Profile(AbstractUser):
         return Token.objects.get(user=self)
 
     def get_num_raps(self):
-        return self.clip_set.all().count()
+        return self.rapsession_set.all().count()
 
     def get_num_likes(self):
         return self.like_set.all().count()
 
     def get_likes(self):
-        return self.like_set.all().order_by('-created')
+        return self.like_set.all().order_by('-created_at')
 
     def get_liked_sessions(self):
         likes = self.like_set.all()
@@ -82,6 +82,21 @@ class Follow(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True
     )
+
+    def create_activity(self):
+        from feedly.activity import Activity
+        from api.core.verbs import FollowVerb
+        activity = Activity(
+            actor = self.user.id,
+            verb = FollowVerb,
+            object = self.id,
+            time = datetime.utcnow(),
+            extra_context = dict(
+                actor_username=self.user.username,
+                actor_profile_picture_url=self.user.profile_picture.url
+            )
+        )
+        return activity
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

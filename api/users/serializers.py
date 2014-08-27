@@ -26,7 +26,7 @@ class FlatProfileSerializer(serializers.ModelSerializer):
             'last_login'
         )
 
-
+from api.rapsessions.serializers import LikeSerializer
 class ProfileSerializer(serializers.ModelSerializer):
 
     def get_num_likes(self, profile):
@@ -46,7 +46,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_followers(self, profile):
         followers = profile.get_followers()
         if len(followers):
-            item = followers[0]
             followers = [follow.user for follow in followers]
             return FlatProfileSerializer(followers, many=True).data
         else:
@@ -62,9 +61,18 @@ class ProfileSerializer(serializers.ModelSerializer):
         else:
             return None
 
+    def get_likes(self, profile):
+        from api.rapsessions.serializers import RapSessionSerializer
+        if profile:
+            likes = [like.session for like in profile.get_likes()]
+            return RapSessionSerializer(likes, many=True).data
+        return None
+
+
     # user = UserSerializer()
     followers = serializers.SerializerMethodField('get_followers')
     following = serializers.SerializerMethodField('get_following')
+    likes = serializers.SerializerMethodField('get_likes')
 
     num_likes = serializers.SerializerMethodField('get_num_likes')
     num_raps = serializers.SerializerMethodField('get_num_raps')
@@ -86,5 +94,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             'num_likes',
             'num_raps',
             'following',
-            'followers'
+            'followers',
+            'likes'
         )

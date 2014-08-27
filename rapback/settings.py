@@ -118,6 +118,11 @@ SWAGGER_SETTINGS = {
     ]
 }
 
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 

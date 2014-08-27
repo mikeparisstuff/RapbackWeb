@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from api.rapsessions.models import RapSession, Clip, Like, Beat
+from api.rapsessions.models import RapSession, Like, Beat, Rapback
 
 class RapSessionAdmin(admin.ModelAdmin):
 
@@ -10,13 +10,13 @@ class RapSessionAdmin(admin.ModelAdmin):
 		'created_at'
 	)
 
-class ClipAdmin(admin.ModelAdmin):
-	list_display = (
-		'id',
-		'creator',
-		'session',
-		'clip_num',
-	)
+# class ClipAdmin(admin.ModelAdmin):
+# 	list_display = (
+# 		'id',
+# 		'creator',
+# 		'session',
+# 		'clip_num',
+# 	)
 
 class LikeAdmin(admin.ModelAdmin):
 	list_display = (
@@ -32,6 +32,13 @@ class BeatAdmin(admin.ModelAdmin):
         'title'
     )
 
+class RapbackAdmin(admin.ModelAdmin):
+    list_display = (
+        'original',
+        'response',
+        'created_at'
+    )
+
 # class BattleVoteAdmin(admin.ModelAdmin):
 # 	list_display = (
 # 		'id',
@@ -40,7 +47,8 @@ class BeatAdmin(admin.ModelAdmin):
 # 	)
 
 admin.site.register(RapSession, RapSessionAdmin)
-admin.site.register(Clip, ClipAdmin)
+# admin.site.register(Clip, ClipAdmin)
 admin.site.register(Like, LikeAdmin)
 admin.site.register(Beat, BeatAdmin)
+admin.site.register(Rapback, RapbackAdmin)
 # admin.site.register(BattleVote, BattleVoteAdmin)

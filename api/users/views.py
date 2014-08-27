@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 
+from api.core.verbs import *
+from api.rapsessions.recent_activity_feedly import feedly as recent_activity_feedly
 from api.users.models import Profile, Follow
 from api.users.serializers import ProfileSerializer
 from api.core.api import AuthenticatedView, UnauthenticatedView
@@ -135,6 +137,49 @@ class HandleInvites(UnauthenticatedView):
         return Response('You are using an {} device'.format(type_of_device))
 
 
+class HandleRecentActivity(AuthenticatedView):
+
+    def get(self, request, format=None):
+        feed = recent_activity_feedly.get_feeds(request.user.id)['normal']
+        user_feed = recent_activity_feedly.get_user_feed(request.user.id)
+        activities = feed[:]
+        activities.extend(user_feed[:])
+        recent_activies = []
+        for activity in activities:
+            if activity.verb is LikeVerb:
+                act = {
+                    'type': 'LIKE',
+                    'actor_id': activity.actor_id,
+                    'object_id': activity.object_id,
+                    'time': activity.time,
+                    'extra_context': activity.extra_context}
+                recent_activies.append(act)
+            elif activity.verb is FollowVerb:
+                recent_activies.append({
+                    'type': 'FOLLOW',
+                    'actor_id': activity.actor_id,
+                    'object_id': activity.object_id,
+                    'time': activity.time,
+                    'extra_context': activity.extra_context
+                })
+            elif activity.verb is SessionVerb:
+                recent_activies.append({
+                    'type': 'SESSION',
+                    'actor_id': activity.actor_id,
+                    'object_id': activity.object_id,
+                    'time': activity.time,
+                    'extra_context': activity.extra_context
+                })
+            elif activity.verb is CommentVerb:
+                recent_activies.append({
+                    'type': 'COMMENT',
+                    'actor_id': activity.actor_id,
+                    'object_id': activity.object_id,
+                    'time': activity.time,
+                    'extra_context': activity.extra_context
+                })
+        return Response(recent_activies, status=status.HTTP_200_OK)
+
 class HandleMyProfile(AuthenticatedView):
 
     def get(self, request, format=None):
@@ -198,10 +243,12 @@ class HandleFollowers(AuthenticatedView):
         try:
             target_uname = request.DATA['target']
             target = Profile.objects.get(username=target_uname)
-            Follow.objects.get_or_create(
+            f, created = Follow.objects.get_or_create(
                 user = me,
                 target = target
             )
+            # if created:
+            recent_activity_feedly.add_recent_activity(f, me.id)
             return Response({
                 'detail': 'Successfully followed user with username: {}'.format(target_uname)
                 }, status = status.HTTP_201_CREATED
