@@ -1,15 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 set -e
-LOGFILE=/var/log/gunicorn/rapback.log
-ERRFILE=/var/log/gunicorn/rapback.err
+LOGFILE=~/.gunicorn/rapback.log
+ERRFILE=~/.gunicorn/rapback.err
 LOGDIR=$(dirname $LOGFILE)
 ERRDIR=$(dirname $ERRFILE)
 NUM_WORKERS=3
 USER=ubuntu
 DJANGO_WSGI_MODULE=rapback.wsgi
 cd /home/ubuntu/rapback
-source /usr/local/bin/virtualenvwrapper.sh
-workon rapback
+source ~/.virtualenvs/rapback/bin/activate
 test -d $LOGDIR || mkdir -p $LOGDIR
 test -d $ERRDIR || mkdir -p $ERRDIR
 exec gunicorn --error-logfile=$ERRFILE --log-file=$LOGFILE \
