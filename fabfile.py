@@ -36,7 +36,7 @@ def deploy():
         if run("test -d %s" % code_dir).failed:
             run("git clone git@github.com:mlp5ab/RapbackWeb.git %s" % code_dir)
             with cd(code_dir):
-                run('mkvirtualenv rapback')
+                run('source /usr/local/bin/virtualenvwrapper.sh && mkvirtualenv rapback')
                 run("workon rapback && pip install -r requirements.txt")
     with cd(code_dir):
         run("git pull origin")
@@ -61,6 +61,11 @@ def run_debug():
 def restart_celery():
     run("workon rapback && supervisorctl -c ~/.supervisor/supervisord.conf restart rapback-celery")
 
+def append_keys():
+    for key in []:
+        run("echo {} >> ~/.bashrc".format(key))
+    run("source ~/.bashrc")
+
 def setup_new_aws_instance():
     with cd("~"):
         run('wget https://bootstrap.pypa.io/get-pip.py')
@@ -81,6 +86,7 @@ def setup_new_aws_instance():
 def setup_new_instance():
     with cd("~"):
         run('sudo apt-get update')
+        run('sudo apt-get upgrade')
         run('wget https://bootstrap.pypa.io/get-pip.py')
         run('sudo python get-pip.py')
         run('sudo pip install virtualenv')
@@ -88,7 +94,7 @@ def setup_new_instance():
         run('echo WORKON_HOME=$HOME/.virtualenvs >> .bashrc')
         run('echo source /usr/local/bin/virtualenvwrapper.sh >> .bashrc')
         run('source .bashrc')
-        run('sudo apt-get install git-core gcc python-setuptools')
+        run('sudo apt-get install git-core gcc libpq-dev python-dev postgresql postgresql-contrib python-setuptools nginx')
     deploy()
     with cd(code_dir):
         run('workon rapback && pip install -r requirements.txt')
