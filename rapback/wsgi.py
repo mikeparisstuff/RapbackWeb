@@ -12,3 +12,5 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rapback.settings")
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
+
+# gunicorn --pythonpath ~/projects/rapback --error-logfile err.txt -b 0.0.0.0:8000 rapback.wsgi:application
