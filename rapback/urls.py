@@ -23,6 +23,7 @@ urlpatterns = patterns('',
     url(r'^users/me/clips/$', sessions_views.HandleMyRapSessionClips.as_view(), name='get_my_clips'),
     url(r'^users/me/follow/$', users_views.HandleFollowers.as_view(), name='handle_followers'),
     url(r'^users/me/recent/$', users_views.HandleRecentActivity.as_view(), name='handle_recent_activity'),
+    url(r'^users/me/contacts/$', users_views.HandleFindInContacts.as_view(), name='handle_find_in_contacts'),
     url(r'^sessions/rapbacks/(?P<session>\d+)/$', sessions_views.HandleRapbacks.as_view(), name='handle_rapbacks'),
     url(r'^sessions/viewcount/(?P<session>\d+)/$', sessions_views.HandleViewCount.as_view(), name='handle_view_count'),
 

@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -6,7 +8,7 @@ from rest_framework.authtoken.models import Token
 from api.core.verbs import *
 from api.rapsessions.recent_activity_feedly import feedly as recent_activity_feedly
 from api.users.models import Profile, Follow
-from api.users.serializers import ProfileSerializer
+from api.users.serializers import ProfileSerializer, FlatProfileSerializer
 from api.core.api import AuthenticatedView, UnauthenticatedView
 
 
@@ -136,6 +138,25 @@ class HandleInvites(UnauthenticatedView):
             type_of_device = 'Android'
         return Response('You are using an {} device'.format(type_of_device))
 
+class HandleFindInContacts(AuthenticatedView):
+    def post(self, request, format=None):
+        '''
+        Post the list of all the phone-numbers in the contacts.
+        Returns all the users that are in the contacts list
+        '''
+        try:
+            numbers = json.loads(request.DATA['phone_numbers'])
+            users = Profile.objects.filter(phone_number__in = numbers)
+            serializer = FlatProfileSerializer(users, many=True)
+            return Response(
+                {"users": serializer.data},
+                status = status.HTTP_200_OK
+            )
+        except KeyError:
+            return Response(
+                {"error": "Must submit a list of phone_numbers to check for contacts"},
+                status = status.HTTP_400_BAD_REQUEST
+            )
 
 class HandleRecentActivity(AuthenticatedView):
 
@@ -272,7 +293,7 @@ class HandleFollowers(AuthenticatedView):
         '''
         me = request.user
         try:
-            target_uname = request.DATA['target']
+            target_uname = request.GET['target']
             target = Profile.objects.get(username=target_uname)
             Follow.objects.get(user = me, target = target).delete()
             return Response({
