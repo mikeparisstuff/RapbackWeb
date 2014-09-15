@@ -96,7 +96,8 @@ class Follow(models.Model):
             time = datetime.utcnow(),
             extra_context = dict(
                 actor_username=self.user.username,
-                actor_profile_picture_url=prof_pic_url
+                actor_profile_picture_url=prof_pic_url,
+                target_username=self.target.username
             )
         )
         return activity

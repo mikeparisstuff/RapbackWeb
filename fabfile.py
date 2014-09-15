@@ -61,6 +61,10 @@ def run_debug():
 def restart_celery():
     run("workon rapback && supervisorctl -c ~/.supervisor/supervisord.conf restart rapback-celery")
 
+@roles('web')
+def restart_web():
+    run("workon rapback && supervisorctl -c .supervisor/supervisord.conf restart rapback-web")
+
 def append_keys():
     for key in []:
         run("echo {} >> ~/.bashrc".format(key))
