@@ -86,6 +86,9 @@ class Follow(models.Model):
     def create_activity(self):
         from feedly.activity import Activity
         from api.core.verbs import FollowVerb
+        prof_pic_url = None
+        if self.user.profile_picture and (self.user.profile_picture, 'url'):
+            prof_pic_url = self.user.profile_picture.url
         activity = Activity(
             actor = self.user.id,
             verb = FollowVerb,
@@ -93,7 +96,7 @@ class Follow(models.Model):
             time = datetime.utcnow(),
             extra_context = dict(
                 actor_username=self.user.username,
-                actor_profile_picture_url=self.user.profile_picture.url
+                actor_profile_picture_url=prof_pic_url
             )
         )
         return activity

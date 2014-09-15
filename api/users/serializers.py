@@ -6,8 +6,8 @@ from api.users.models import Profile
 class FlatProfileSerializer(serializers.ModelSerializer):
 
     def get_profile_picture_url(self, profile):
-        if profile.profile_picture:
-            return profile.profile_picture.url if profile.profile_picture.url else None
+        if profile.profile_picture and hasattr(profile.profile_picture, 'url'):
+            return profile.profile_picture.url
         return None
 
     profile_picture = serializers.SerializerMethodField('get_profile_picture_url')
@@ -39,8 +39,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             return profile.get_num_raps()
 
     def get_profile_picture_url(self, profile):
-        if profile.profile_picture:
-            return profile.profile_picture.url if profile.profile_picture.url else None
+        if profile.profile_picture and hasattr(profile.profile_picture, 'url'):
+            return profile.profile_picture.url
         return None
 
     def get_followers(self, profile):

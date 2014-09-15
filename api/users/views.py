@@ -284,6 +284,10 @@ class HandleFollowers(AuthenticatedView):
                 'error': "The user you are trying to follow does not exist"
                 }, status = status.HTTP_400_BAD_REQUEST
             )
+        except ValueError as e:
+            return Response({
+                'error': e
+            }, status = status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, format=None):
         '''
