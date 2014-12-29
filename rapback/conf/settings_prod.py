@@ -11,15 +11,16 @@ DATABASES = {
             'PORT': os.environ['RDS_PORT'],                      # Set to empty string for default.
     }
 }
-AWS_STORAGE_BUCKET_NAME = 'rapbackprod'
+AWS_STORAGE_BUCKET_NAME = 'rapback-prod-s3'
 
 # Celery
-BROKER_URL = "sqs://sqs.us-east-1.amazonaws.com/487142144782/rapback-celery-broker//"
+BROKER_URL = "sqs://sqs.us-east-1.amazonaws.com/881959240084/RapbackProdQueue//"
 
 # Default to AWS creds. Won't be able to access without permissions
 FEEDLY_REDIS_CONFIG = {
     'default': {
-        'host': 'ec2-54-210-10-162.compute-1.amazonaws.com',
+        # 'host': 'ec2-54-210-10-162.compute-1.amazonaws.com',
+        'host': 'localhost',
         'port': 6379,
         'db': 0,
         'password': None
