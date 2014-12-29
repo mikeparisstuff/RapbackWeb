@@ -62,6 +62,7 @@ else:
     print 'WARNING: The environment variable INSTANCE_ID is not set!'
     print 'Using default settings...'
 
+INSTANCE_ID = 'PROD'
 if INSTANCE_ID == 'LOCAL_VAGRANT':
     print 'Import Local Vagrant Settings'
     from .conf.settings_vagrant import *
