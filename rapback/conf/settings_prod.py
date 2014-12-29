@@ -7,7 +7,7 @@ DATABASES = {
             # The following settings are not used with sqlite3:
             'USER': os.environ['RDS_USERNAME'],
             'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': 'rapbackprod.cp59mlmcctc3.us-east-1.rds.amazonaws.com',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+            'HOST': 'rapbackprodrds.cwbcnf9punqe.us-east-1.rds.amazonaws.com',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
             'PORT': os.environ['RDS_PORT'],                      # Set to empty string for default.
     }
 }
