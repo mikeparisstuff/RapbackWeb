@@ -2,7 +2,7 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 
 env.use_ssh_config = True
-env.roledefs = {'web': ['rapback_web_ubuntu'], 'celery': ['rapback_celery']}
+env.roledefs = {'web': ['rapback_web'], 'celery': ['rapback_celery']}
 code_dir = "~/rapback"
 
 @roles('web')
@@ -70,35 +70,50 @@ def append_keys():
         run("echo {} >> ~/.bashrc".format(key))
     run("source ~/.bashrc")
 
-def setup_new_aws_instance():
-    with cd("~"):
-        run('wget https://bootstrap.pypa.io/get-pip.py')
-        run('sudo python get-pip.py')
-        run('sudo pip install virtualenv')
-        run('sudo pip install virtualenvwrapper')
-        run('echo WORKON_HOME=$HOME/.virtualenvs >> .bashrc')
-        run('echo source /usr/bin/virtualenvwrapper.sh >> .bashrc')
-        run('source .bashrc')
-        run('mkvirtualenv rapback -p /usr/bin/python2.7')
-        run('sudo yum install git')
-        run('sudo yum install gcc python-setuptools python-devel postgresql-devel')
-    deploy()
-    with cd(code_dir):
-        run('workon rapback && pip install -r requirements.txt')
+# def setup_new_aws_instance():
+#     with cd("~"):
+#         run('wget https://bootstrap.pypa.io/get-pip.py')
+#         run('sudo python get-pip.py')
+#         run('sudo pip install virtualenv')
+#         run('sudo pip install virtualenvwrapper')
+#         run('echo WORKON_HOME=$HOME/.virtualenvs >> .bashrc')
+#         run('echo source /usr/bin/virtualenvwrapper.sh >> .bashrc')
+#         run('source .bashrc')
+#         run('mkvirtualenv rapback -p /usr/bin/python2.7')
+#         run('sudo yum install git')
+#         run('sudo yum install gcc python-setuptools python-devel postgresql-devel')
+#     deploy()
+#     with cd(code_dir):
+#         run('workon rapback && pip install -r requirements.txt')
+
+
+# def setup_new_instance():
+#     with cd("~"):
+#         run('sudo apt-get update')
+#         run('sudo apt-get upgrade')
+#         run('wget https://bootstrap.pypa.io/get-pip.py')
+#         run('sudo python get-pip.py')
+#         run('sudo pip install virtualenv')
+#         run('sudo pip install virtualenvwrapper')
+#         run('echo WORKON_HOME=$HOME/.virtualenvs >> .bashrc')
+#         run('echo source /usr/local/bin/virtualenvwrapper.sh >> .bashrc')
+#         run('source .bashrc')
+#         run('sudo apt-get install git-core gcc libpq-dev python-dev postgresql postgresql-contrib python-setuptools nginx')
+#     deploy()
+#     with cd(code_dir):
+#         run('workon rapback && pip install -r requirements.txt')
 
 
 def setup_new_instance():
     with cd("~"):
         run('sudo apt-get update')
-        run('sudo apt-get upgrade')
-        run('wget https://bootstrap.pypa.io/get-pip.py')
-        run('sudo python get-pip.py')
-        run('sudo pip install virtualenv')
-        run('sudo pip install virtualenvwrapper')
-        run('echo WORKON_HOME=$HOME/.virtualenvs >> .bashrc')
-        run('echo source /usr/local/bin/virtualenvwrapper.sh >> .bashrc')
+        run('sudo apt-get install gcc postgresql postgresql-contrib libpq-dev python-dev python-setuptools nginx build-essential git')
+        run('sudo apt-get install python3 python3-dev')
+        run('sudo apt-get install python-pip')
+        run('sudo pip install virtualenv virtualenvwrapper')
+        run('echo export WORKON_HOME=$HOME/.virtualenvs >> .bashrc')
+        run('echo export PROJECT_HOME=$HOME>>.bashrc')
+        run('echo source /usr/local/bin/virtualenvwrapper.sh>>.bashrc')
         run('source .bashrc')
-        run('sudo apt-get install git-core gcc libpq-dev python-dev postgresql postgresql-contrib python-setuptools nginx')
-    deploy()
-    with cd(code_dir):
-        run('workon rapback && pip install -r requirements.txt')
+        run('mkvirtualenv rapback')
+    print "You now need to ssh in to create a ssh key... Also you still need to add awscreds."
