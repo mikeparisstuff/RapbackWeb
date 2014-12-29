@@ -54,15 +54,13 @@ if not AWS_SECRET_ACCESS_KEY:
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
 # Environment specific settings
-INSTANCE_ID = 'rapchat.base'
 #Try to get an i nstance id from the environment
-if os.environ.get('INSTANCE_ID', None):
-    INSTANCE_ID = os.environ.get('INSTANCE_ID', INSTANCE_ID)
-else:
+INSTANCE_ID = os.environ.get('INSTANCE_ID', None)
+print 'Got INSTANCE_ID = {}'.format(INSTANCE_ID)
+if not INSTANCE_ID:
     print 'WARNING: The environment variable INSTANCE_ID is not set!'
     print 'Using default settings...'
 
-INSTANCE_ID = 'PROD'
 if INSTANCE_ID == 'LOCAL_VAGRANT':
     print 'Import Local Vagrant Settings'
     from .conf.settings_vagrant import *
