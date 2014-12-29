@@ -63,8 +63,10 @@ else:
     print 'Using default settings...'
 
 if INSTANCE_ID == 'LOCAL_VAGRANT':
+    print 'Import Local Vagrant Settings'
     from .conf.settings_vagrant import *
 elif INSTANCE_ID == 'PROD':
+    print 'Importing PROD Settings'
     from .conf.settings_prod import *
 
 # Application definition
