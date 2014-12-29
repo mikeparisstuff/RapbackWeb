@@ -33,8 +33,25 @@ TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+AWS_ACCESS_KEY_ID = None
+AWS_SECRET_ACCESS_KEY = None
+
+try:
+    with open(os.path.join(BASE_DIR, ".awscreds/credentials.csv"), "r") as f:
+        f.readline()
+        line = f.readline()
+        split = line.split(",")
+        key = split[1]
+        secret = split[2]
+        AWS_ACCESS_KEY_ID = key
+        AWS_SECRET_ACCESS_KEY = secret
+except IOError as e:
+    print "Could not find AWS Credential File"
+
+if not AWS_ACCESS_KEY_ID:
+    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+if not AWS_SECRET_ACCESS_KEY:
+    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
 # Environment specific settings
 INSTANCE_ID = 'rapchat.base'
