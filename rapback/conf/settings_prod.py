@@ -13,6 +13,9 @@ DATABASES = {
 }
 AWS_STORAGE_BUCKET_NAME = 'rapback-prod-s3'
 
+STREAM_API_KEY = 'tr9pcvpxke9t'
+STREAM_API_SECRET = 'n47xmf6mawd8dusr69bxwn9xhvhjw6wsekdpk2ntfz6wr9xhpu5yf7hmfrkaepjm'
+
 # Celery
 BROKER_URL = "sqs://sqs.us-east-1.amazonaws.com/881959240084/RapbackProdQueue//"
 

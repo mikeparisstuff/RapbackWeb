@@ -5,10 +5,12 @@ from rest_framework.response import Response
 from api.rapsessions.models import RapSession, AUDIO, VIDEO, Comment, Like, Beat, Rapback
 from api.rapsessions.serializers import RapSessionSerializer, CommentSerializer, LikeSerializer, PaginatedRapSessionSerializer
 from api.users.models import Profile
-from .rapsession_feedly import feedly as session_feedly
-from .recent_activity_feedly import feedly as recent_activity_feedly
+# from .rapsession_feedly import feedly as session_feedly
+# from .recent_activity_feedly import feedly as recent_activity_feedly
 from api.core.api import AuthenticatedView
 
+from stream_django.feed_manager import feed_manager
+from stream_django.enrich import Enrich
 
 ####################################################################
 #					 	GROUP SESSIONS
@@ -64,8 +66,9 @@ class HandleRapSessions(AuthenticatedView):
                 except RapSession.DoesNotExist:
                     print 'Session being rapbacked to does not exist'
 
-            recent_activity_feedly.add_recent_activity(gs, request.user.id)
-            session_feedly.add_session(gs)
+            # REPLACED
+            # recent_activity_feedly.add_recent_activity(gs, request.user.id)
+            # session_feedly.add_session(gs)
 
             serializer = RapSessionSerializer(gs)
             return Response(
@@ -89,14 +92,33 @@ class HandleRapSessions(AuthenticatedView):
         '''
         # sessions = RapSession.objects.order_by('-modified_at')[:16]
 
-        feed = session_feedly.get_feeds(request.user.id)['normal']
-        user_feed = session_feedly.get_user_feed(request.user.id)
+        # REPLACED
+        # feed = session_feedly.get_feeds(request.user.id)['normal']
+        # user_feed = session_feedly.get_user_feed(request.user.id)
+        # feed = feed_manager.get_feed('flat', request.user.id)
+        # feed = feed_manager.get_feed('flat', request.user.id)
+        # user_feed = feed_manager.get_feed('user', request.user.id)
+        feed = feed_manager.get_feed('rapsessions', request.user.id)
+        activities = feed.get(limit=25)['results']
+        # user_activities = user_feed.get(limit=25)['results']
 
+        session_ids = []
+        for activity in activities:
+            if activity['verb'] == 'rapsession':
+                session_ids.append(activity['object'].split(':')[1])
 
-        print 'GOT FEED WITH COUNT: {}'.format(feed.count())
-        session_ids = feed.get_ids()
-        user_session_ids = user_feed.get_ids()
-        session_ids.extend(user_session_ids)
+        # for activity in user_activities:
+        #     if activity['verb'] == 'rapsession':
+        #         session_ids.append(activity['object'].split(':')[1])
+
+        # enricher = Enrich()
+        # sessions = enricher.enrich_activities(activities)
+
+        # REPLACED
+        # print 'GOT FEED WITH COUNT: {}'.format(feed.count())
+        # session_ids = feed.get_ids()
+        # user_session_ids = user_feed.get_ids()
+        # session_ids.extend(user_session_ids)
 
         sessions = RapSession.objects.filter(id__in = session_ids).order_by('-created_at')
 
@@ -128,8 +150,15 @@ class HandleProfileSessions(AuthenticatedView):
         print "In Request " + user_id
         try:
             profile = Profile.objects.get(id = user_id)
-            feed = session_feedly.get_user_feed(profile.id)
-            session_ids = feed.get_ids()
+            # feed = session_feedly.get_user_feed(profile.id)
+            feed = feed_manager.get_feed('user', profile.id)
+            activities = feed.get()['results']
+            session_ids = []
+            for activity in activities:
+                if activity.get('verb') == 'rapsession':
+                    session_id = activity['object'].split(':')[1]
+                    session_ids.append(session_id)
+
             sessions = RapSession.objects.filter(id__in = session_ids).order_by('-created_at')
             serializer = RapSessionSerializer(sessions, many=True)
             return Response({
@@ -282,7 +311,7 @@ class HandleRapSessionComments(AuthenticatedView):
                 creator=request.user,
                 text = request.DATA['text']
             )
-            recent_activity_feedly.add_recent_activity(comment, request.user.id)
+            # recent_activity_feedly.add_recent_activity(comment, request.user.id)
             serializer = CommentSerializer(comment)
             return Response({
                 'comment': serializer.data,
@@ -344,7 +373,7 @@ class HandleRapSessionLikes(AuthenticatedView):
                 session= session
             )
             serializer = LikeSerializer(like)
-            recent_activity_feedly.remove_recent_activity(like, like.user.id)
+            # recent_activity_feedly.remove_recent_activity(like, like.user.id)
             like.delete()
             return Response({
                 'like': serializer.data
@@ -356,10 +385,10 @@ class HandleRapSessionLikes(AuthenticatedView):
                 user= request.user,
                 session= session
             )
-            try:
-                recent_activity_feedly.add_recent_activity(like, like.user.id)
-            except ValueError as e:
-                print 'Error adding activity to recent activity feed: {}'.format(e)
+            # try:
+            #     recent_activity_feedly.add_recent_activity(like, like.user.id)
+            # except ValueError as e:
+            #     print 'Error adding activity to recent activity feed: {}'.format(e)
             serializer = LikeSerializer(like)
             return Response({
                 'like': serializer.data

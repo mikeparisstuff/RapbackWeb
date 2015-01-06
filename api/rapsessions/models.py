@@ -1,13 +1,11 @@
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+# from django.db.models.signals import post_save
+# from django.dispatch import receiver
 from datetime import datetime
 
 from api.users.models import Profile
-
-
-
-
+from stream_django.activity import Activity
+from stream_django.feed_manager import feed_manager
 
 ################################ GROUP SESSIONS ##################################
 
@@ -63,7 +61,7 @@ def get_thumbnail_upload_path(self, filename):
     return 'sessions/session_{}/thumbnail.jpg'.format(self.id)
 
 
-class RapSession(models.Model):
+class RapSession(models.Model, Activity):
     '''
     Rapchat Session Model
     '''
@@ -125,19 +123,43 @@ class RapSession(models.Model):
         db_index = True
     )
 
-    def create_activity(self):
-        from feedly.activity import Activity
-        from api.core.verbs import SessionVerb
-        activity = Activity(
-            actor = self.creator.id,
-            verb = SessionVerb,
-            object = self.id,
-            time = datetime.utcnow(),
-            extra_context=dict(
-                actor_username=self.creator.username,
-                actor_profile_picture_url=self.creator.profile_picture.url)
-        )
-        return activity
+    # Setup actor reference for stream_django
+    @property
+    def activity_actor_attr(self):
+        return self.creator
+
+    @property
+    def activity_object_attr(self):
+        return self
+
+    @property
+    def extra_activity_data(self):
+        url = ''
+        if self.creator.profile_picture:
+            url = self.creator.profile_picture.url
+        return {
+            'actor_username': self.creator.username,
+            'actor_profile_picture_url': url
+        }
+
+    @property
+    def activity_author_feed(self):
+        return 'rapsessions'
+
+    # Changed to use the stream_django module
+    # def create_activity(self):
+    #     from feedly.activity import Activity
+    #     from api.core.verbs import SessionVerb
+    #     activity = Activity(
+    #         actor = self.creator.id,
+    #         verb = SessionVerb,
+    #         object = self.id,
+    #         time = datetime.utcnow(),
+    #         extra_context=dict(
+    #             actor_username=self.creator.username,
+    #             actor_profile_picture_url=self.creator.profile_picture.url)
+    #     )
+    #     return activity
 
     def __unicode__(self):
         return 'Session: {}'.format(self.title)
@@ -235,7 +257,7 @@ def get_waveform_upload_path(self, filename):
 
 
 
-class Comment(models.Model):
+class Comment(models.Model, Activity):
     '''
     Rapchat Comment Model
     '''
@@ -270,23 +292,48 @@ class Comment(models.Model):
         null = True
     )
 
-    def create_activity(self):
-        from feedly.activity import Activity
-        from api.core.verbs import CommentVerb
-        activity = Activity(
-            actor = self.creator.id,
-            verb = CommentVerb,
-            object = self.id,
-            time = datetime.utcnow(),
-            extra_context=dict(
-                session_id=self.session.id,
-                actor_username=self.creator.username,
-                actor_profile_picture_url=self.creator.profile_picture.url
-            )
-        )
-        return activity
+    @property
+    def activity_actor_attr(self):
+        return self.creator
 
-class Like(models.Model):
+    @property
+    def activity_object_attr(self):
+        return self
+
+    # Only notify the person whose rap we are commenting on
+    @property
+    def activity_notify(self):
+        target_feed = feed_manager.get_notification_feed(self.session.creator.id)
+        return [target_feed]
+
+    @property
+    def extra_activity_data(self):
+        url = ''
+        if self.creator.profile_picture:
+            url = self.creator.profile_picture.url
+        return {
+            'session_id': self.session.id,
+            'actor_username': self.creator.username,
+            'actor_profile_picture_url': url
+        }
+
+    # def create_activity(self):
+    #     from feedly.activity import Activity
+    #     from api.core.verbs import CommentVerb
+    #     activity = Activity(
+    #         actor = self.creator.id,
+    #         verb = CommentVerb,
+    #         object = self.id,
+    #         time = datetime.utcnow(),
+    #         extra_context=dict(
+    #             session_id=self.session.id,
+    #             actor_username=self.creator.username,
+    #             actor_profile_picture_url=self.creator.profile_picture.url
+    #         )
+    #     )
+    #     return activity
+
+class Like(models.Model, Activity):
     '''
     Rapchat Like Model
     '''
@@ -312,20 +359,42 @@ class Like(models.Model):
         null = True
     )
 
-    def create_activity(self):
-        from feedly.activity import Activity
-        from api.core.verbs import LikeVerb
-        activity = Activity(
-            actor = self.user.id,
-            verb = LikeVerb,
-            object = self.id,
-            time = datetime.utcnow(),
-            extra_context=dict(
-                session_id=self.session.id,
-                actor_username=self.user.username,
-                actor_profile_picture_url = self.user.profile_picture.url)
-        )
-        return activity
+    # Only notify the person whose rap we are liking
+    @property
+    def activity_object_attr(self):
+        return self
+
+    @property
+    def activity_notify(self):
+        target_feed = feed_manager.get_notification_feed(self.session.creator.id)
+        user_feed = feed_manager.get_notification_feed(self.user.id)
+        return [target_feed, user_feed]
+
+    @property
+    def extra_activity_data(self):
+        url = ''
+        if self.user.profile_picture:
+            url = self.user.profile_picture.url
+        return {
+            'session_id': self.session.id,
+            'actor_username': self.user.username,
+            'actor_profile_picture_url': url
+        }
+
+    # def create_activity(self):
+    #     from feedly.activity import Activity
+    #     from api.core.verbs import LikeVerb
+    #     activity = Activity(
+    #         actor = self.user.id,
+    #         verb = LikeVerb,
+    #         object = self.id,
+    #         time = datetime.utcnow(),
+    #         extra_context=dict(
+    #             session_id=self.session.id,
+    #             actor_username=self.user.username,
+    #             actor_profile_picture_url = self.user.profile_picture.url)
+    #     )
+    #     return activity
 
 
     def __unicode__(self):

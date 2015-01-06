@@ -80,14 +80,15 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
-    'feedly',
+    # 'feedly',
+    'stream_django',
     'django_extensions',
     'gunicorn',
     'djcelery',
     'api.users',
     'api.rapsessions',
     'api.feedback',
-    'api.core'
+    'api.core',
 )
 
 MIDDLEWARE_CLASSES = (

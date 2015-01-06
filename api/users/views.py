@@ -6,10 +6,12 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 
 from api.core.verbs import *
-from api.rapsessions.recent_activity_feedly import feedly as recent_activity_feedly
+# from api.rapsessions.recent_activity_feedly import feedly as recent_activity_feedly
 from api.users.models import Profile, Follow
 from api.users.serializers import ProfileSerializer, FlatProfileSerializer
 from api.core.api import AuthenticatedView, UnauthenticatedView
+
+from stream_django.feed_manager import feed_manager
 
 
 class WelcomePage(APIView):
@@ -159,47 +161,71 @@ class HandleFindInContacts(AuthenticatedView):
             )
 
 class HandleRecentActivity(AuthenticatedView):
-
+# TODO: NEED TO FIX THIS WITH ENRICHMENT
     def get(self, request, format=None):
-        feed = recent_activity_feedly.get_feeds(request.user.id)['normal']
-        user_feed = recent_activity_feedly.get_user_feed(request.user.id)
-        activities = feed[:]
-        activities.extend(user_feed[:])
-        recent_activies = []
-        for activity in activities:
-            if activity.verb is LikeVerb:
-                act = {
-                    'type': 'LIKE',
-                    'actor_id': activity.actor_id,
-                    'object_id': activity.object_id,
-                    'time': activity.time,
-                    'extra_context': activity.extra_context}
-                recent_activies.append(act)
-            elif activity.verb is FollowVerb:
-                recent_activies.append({
-                    'type': 'FOLLOW',
-                    'actor_id': activity.actor_id,
-                    'object_id': activity.object_id,
-                    'time': activity.time,
-                    'extra_context': activity.extra_context
-                })
-            elif activity.verb is SessionVerb:
-                recent_activies.append({
-                    'type': 'SESSION',
-                    'actor_id': activity.actor_id,
-                    'object_id': activity.object_id,
-                    'time': activity.time,
-                    'extra_context': activity.extra_context
-                })
-            elif activity.verb is CommentVerb:
-                recent_activies.append({
-                    'type': 'COMMENT',
-                    'actor_id': activity.actor_id,
-                    'object_id': activity.object_id,
-                    'time': activity.time,
-                    'extra_context': activity.extra_context
-                })
-        return Response(recent_activies, status=status.HTTP_200_OK)
+        # feed = recent_activity_feedly.get_feeds(request.user.id)['normal']
+        # user_feed = recent_activity_feedly.get_user_feed(request.user.id)
+        # feed = feed_manager.get_feed(limit=25)['results']
+        # activities = feed[:]
+        feed = feed_manager.get_feed('notification', request.user.id)
+        aggregates = feed.get(limit=25)
+        aggregates = aggregates['results']
+        # activities.extend(user_feed[:])
+        recent_activities = []
+        for aggregate in aggregates:
+            activities = aggregate['activities']
+            for activity in activities:
+                actor_id = activity['actor'].split(':')[1]
+                object_id = activity['object'].split(':')[1]
+                if activity['verb'] == 'like':
+                    act = {
+                        'type': 'LIKE',
+                        'actor_id': actor_id,
+                        'object_id': object_id,
+                        'time': activity['time'],
+                        'extra_context': {
+                            'target_username': activity.get('target_username'),
+                            'actor_username': activity.get('actor_username'),
+                            'actor_profile_picture_url': activity.get('actor_profile_picture_url')
+                        }
+                    }
+                    recent_activities.append(act)
+                elif activity['verb'] == 'follow':
+                    recent_activities.append({
+                        'type': 'FOLLOW',
+                        'actor_id': actor_id,
+                        'object_id': object_id,
+                        'time': activity['time'],
+                        'extra_context': {
+                            'target_username': activity.get('target_username'),
+                            'actor_username': activity.get('actor_username'),
+                            'actor_profile_picture_url': activity.get('actor_profile_picture_url')
+                        }
+                    })
+                elif activity['verb'] == 'rapsession':
+                    recent_activities.append({
+                        'type': 'SESSION',
+                        'actor_id': actor_id,
+                        'object_id': object_id,
+                        'time': activity['time'],
+                        'extra_context': {
+                            'actor_username': activity.get('actor_username'),
+                            'actor_profile_picture_url': activity.get('actor_profile_picture_url')
+                        }
+                    })
+                elif activity['verb'] == 'comment':
+                    recent_activities.append({
+                        'type': 'COMMENT',
+                        'actor_id': actor_id,
+                        'object_id': object_id,
+                        'time': activity['time'],
+                        'extra_context': {
+                            'session_id': activity.get('session_id'),
+                            'actor_username': activity.get('actor_username'),
+                            'actor_profile_picture_url': activity.get('actor_profile_picture_url')
+                        }
+                    })
+        return Response(recent_activities, status=status.HTTP_200_OK)
 
 class HandleMyProfile(AuthenticatedView):
 
@@ -268,8 +294,8 @@ class HandleFollowers(AuthenticatedView):
                 user = me,
                 target = target
             )
-            # if created:
-            recent_activity_feedly.add_recent_activity(f, me.id)
+
+            # recent_activity_feedly.add_recent_activity(f, me.id)
             return Response({
                 'detail': 'Successfully followed user with username: {}'.format(target_uname)
                 }, status = status.HTTP_201_CREATED
@@ -300,6 +326,7 @@ class HandleFollowers(AuthenticatedView):
             target_uname = request.GET['target']
             target = Profile.objects.get(username=target_uname)
             Follow.objects.get(user = me, target = target).delete()
+            feed_manager.unfollow_user(me.id, target.id)
             return Response({
                 'detail': 'Successfully unfollowed user with username: {}'.format(target_uname)
                 }, status = status.HTTP_200_OK
