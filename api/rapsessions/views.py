@@ -98,8 +98,12 @@ class HandleRapSessions(AuthenticatedView):
         # feed = feed_manager.get_feed('flat', request.user.id)
         # feed = feed_manager.get_feed('flat', request.user.id)
         # user_feed = feed_manager.get_feed('user', request.user.id)
-        feed = feed_manager.get_feed('rapsessions', request.user.id)
-        activities = feed.get(limit=25)['results']
+        try:
+            feed = feed_manager.get_feed('rapsessions', request.user.id)
+            activities = feed.get(limit=25)['results']
+
+        except Exception as e:
+            print(e)
         # user_activities = user_feed.get(limit=25)['results']
 
         session_ids = []

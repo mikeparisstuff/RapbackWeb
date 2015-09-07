@@ -12,8 +12,10 @@ DATABASES = {
     }
 }
 
-STREAM_API_KEY = '5f6tkb3gpft2'
-STREAM_API_SECRET = '9b7ubxw9r5ewtq6nzs9p7fvs324rnjx8hb9hy3ue3z2zvw3ghb64nfg9f4s28z73'
+STREAM_API_KEY = 'y58efseqbg9z'
+STREAM_API_SECRET = 'yfpjbeswsjxy2tmehgw4rnt5ng952w86ur856yzfzyd6fvwg6hrt8wyrnyanwd29'
+
+# print("STREAM_API_KEY: {}, STREAM_API_SECRET:{}".format(STREAM_API_KEY, STREAM_API_SECRET))
 
 # Celery
 BROKER_URL = "sqs://sqs.us-east-1.amazonaws.com/487142144782/vagrant-celery-broker"
